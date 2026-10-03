@@ -2,7 +2,7 @@ services:
 
   postgres:
     image: postgres:17
-    restart: unless-stopped
+    container_name: demo-postgres
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USERNAME}
@@ -11,10 +11,12 @@ services:
       - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - demo-network
 
   app:
     build: .
-    restart: unless-stopped
+    container_name: demo-app
     ports:
       - "${APP_PORT}:8088"
     environment:
@@ -23,6 +25,11 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
     depends_on:
       - postgres
+    networks:
+      - demo-network
 
 volumes:
   postgres_data:
+
+networks:
+  demo-network:
