@@ -3,28 +3,36 @@ services:
   postgres:
     image: postgres:17
     container_name: demo-postgres
+
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+
     ports:
       - "${DB_PORT}:5432"
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
     networks:
       - demo-network
 
   app:
-    build: ghcr.io/tiago002pro/demo-project:latest
+    image: ghcr.io/tiago002pro/demo-project:latest
     container_name: demo-app
+
     ports:
       - "${APP_PORT}:8088"
+
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
+
     depends_on:
       - postgres
+
     networks:
       - demo-network
 
