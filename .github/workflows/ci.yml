@@ -43,9 +43,11 @@ jobs:
       - name: Build da imagem Docker
         run: |
           docker build \
-            -t ghcr.io/${{ github.repository_owner }}/demo-project:latest .
+            -t ghcr.io/${{ github.repository_owner }}/demo-project:latest \
+            -t ghcr.io/${{ github.repository_owner }}/demo-project:${{ github.sha }} \
+            .
 
       - name: Push da imagem
         run: |
-          docker push \
-            ghcr.io/${{ github.repository_owner }}/demo-project:latest
+          docker push ghcr.io/${{ github.repository_owner }}/demo-project:latest
+          docker push ghcr.io/${{ github.repository_owner }}/demo-project:${{ github.sha }}
