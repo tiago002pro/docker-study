@@ -9,15 +9,13 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    env:
-      DB_NAME: demo
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      DB_PORT: 5432
 
     steps:
       - name: Checkout
@@ -32,25 +30,22 @@ jobs:
       - name: Dar permissão ao Gradle
         run: chmod +x gradlew
 
-      - name: Subir PostgreSQL
-        run: docker compose up -d postgres
+      - name: Testes
+        run: ./gradlew test
 
-      - name: Aguardar PostgreSQL
-        run: |
-          until docker compose exec -T postgres pg_isready -U postgres -d demo; do
-            echo "Aguardando PostgreSQL..."
-            sleep 2
-          done
-
-      - name: Build e testes
-        run: ./gradlew build
-
-      - name: Salvar JAR
-        uses: actions/upload-artifact@v4
+      - name: Login no GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          name: application-jar
-          path: build/libs/*.jar
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Derrubar containers
-        if: always()
-        run: docker compose down
+      - name: Build da imagem Docker
+        run: |
+          docker build \
+            -t ghcr.io/${{ github.repository_owner }}/demo-project:latest .
+
+      - name: Push da imagem
+        run: |
+          docker push \
+            ghcr.io/${{ github.repository_owner }}/demo-project:latest
