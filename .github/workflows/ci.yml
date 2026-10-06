@@ -13,6 +13,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      DB_NAME: demo
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_PORT: 5432
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,6 +32,16 @@ jobs:
       - name: Dar permissão ao Gradle
         run: chmod +x gradlew
 
+      - name: Subir PostgreSQL
+        run: docker compose up -d postgres
+
+      - name: Aguardar PostgreSQL
+        run: |
+          until docker compose exec -T postgres pg_isready -U postgres -d demo; do
+            echo "Aguardando PostgreSQL..."
+            sleep 2
+          done
+
       - name: Build e testes
         run: ./gradlew build
 
@@ -34,3 +50,7 @@ jobs:
         with:
           name: application-jar
           path: build/libs/*.jar
+
+      - name: Derrubar containers
+        if: always()
+        run: docker compose down
