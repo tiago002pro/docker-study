@@ -15,7 +15,7 @@ services:
       - demo-network
 
   app:
-    build: .
+    build: ghcr.io/tiago002pro/demo-project:latest
     container_name: demo-app
     ports:
       - "${APP_PORT}:8088"
