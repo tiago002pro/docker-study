@@ -1,4 +1,5 @@
-name: CI
+
+name: CI/CD
 
 on:
   push:
@@ -34,6 +35,7 @@ jobs:
         run: ./gradlew test
 
       - name: Login no GitHub Container Registry
+        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -41,6 +43,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build da imagem Docker
+        if: github.event_name == 'push'
         run: |
           docker build \
             -t ghcr.io/${{ github.repository_owner }}/demo-project:latest \
@@ -48,6 +51,39 @@ jobs:
             .
 
       - name: Push da imagem
+        if: github.event_name == 'push'
         run: |
           docker push ghcr.io/${{ github.repository_owner }}/demo-project:latest
           docker push ghcr.io/${{ github.repository_owner }}/demo-project:${{ github.sha }}
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configurar SSH
+        env:
+          ORACLE_SSH_KEY: ${{ secrets.ORACLE_SSH_KEY }}
+          ORACLE_KNOWN_HOSTS: ${{ secrets.ORACLE_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$ORACLE_SSH_KEY" > ~/.ssh/oracle_deploy
+          chmod 600 ~/.ssh/oracle_deploy
+
+          printf '%s\n' "$ORACLE_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Atualizar aplicação na VM Oracle
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_USER: ${{ secrets.ORACLE_USER }}
+        run: |
+          ssh \
+            -i ~/.ssh/oracle_deploy \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            "$ORACLE_USER@$ORACLE_HOST" \
+            'cd ~/demo-project && docker compose pull app && docker compose up -d --force-recreate app'
