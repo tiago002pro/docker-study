@@ -12,7 +12,7 @@ public class HealthController {
     public Map<String, String> health() {
         return Map.of(
             "status", "UP",
-            "message", "Aplicação rodando na Oracle Cloud!"
+            "message", "Aplicação rodando na Oracle Cloud! PDI DBServer."
         );
     }
 }
