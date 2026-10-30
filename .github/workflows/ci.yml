@@ -86,4 +86,4 @@ jobs:
             -o BatchMode=yes \
             -o StrictHostKeyChecking=yes \
             "$ORACLE_USER@$ORACLE_HOST" \
-            'cd ~/demo-project && docker compose pull app && docker compose up -d --force-recreate app'
+            'cd ~/demo-project && ./deploy.sh'
