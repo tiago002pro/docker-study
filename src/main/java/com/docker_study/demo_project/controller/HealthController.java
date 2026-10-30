@@ -9,7 +9,7 @@ import java.util.Map;
 @RestController
 public class HealthController {
 
-    @Value("${app.environment:dev}")
+    @Value("${app.environment:local}")
     private String environment;
 
     @GetMapping("/api/health")
