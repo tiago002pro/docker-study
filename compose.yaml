@@ -29,7 +29,7 @@ services:
     ports:
       - "127.0.0.1:${APP_PORT}:8088"
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      APP_ENVIRONMENT: ${APP_ENVIRONMENT:-local}
       SERVER_PORT: 8088
       DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
