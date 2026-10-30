@@ -1,42 +1,48 @@
 services:
   postgres:
     image: postgres:17
-
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-
-    ports:
-      - "127.0.0.1:${DB_PORT}:5432"
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
     networks:
       - demo-network
+    command:
+      - postgres
+      - -c
+      - shared_buffers=64MB
+      - -c
+      - max_connections=20
+      - -c
+      - work_mem=4MB
+      - -c
+      - maintenance_work_mem=32MB
+      - -c
+      - autovacuum_work_mem=32MB
 
   app:
     image: ghcr.io/tiago002pro/demo-project:${IMAGE_TAG:-latest}
-
+    restart: unless-stopped
     ports:
-      - "${APP_PORT}:8088"
-
+      - "127.0.0.1:${APP_PORT}:8088"
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       SERVER_PORT: 8088
       DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
-
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx256m -XX:MaxMetaspaceSize=128m -XX:ReservedCodeCacheSize=48m -XX:MaxDirectMemorySize=64m -XX:+UseSerialGC -XX:ActiveProcessorCount=1"
     depends_on:
       - postgres
-
     networks:
       - demo-network
 
 volumes:
   postgres_data:
+    name: ${POSTGRES_VOLUME_NAME}
 
 networks:
   demo-network:
