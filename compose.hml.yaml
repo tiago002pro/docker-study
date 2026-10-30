@@ -13,7 +13,7 @@ services:
       - demo-hml-network
 
   app:
-    image: ghcr.io/tiago002pro/demo-project:${IMAGE_TAG:-latest}
+    image: ghcr.io/tiago002pro/demo-project:${APP_IMAGE_TAG:-latest}
     restart: unless-stopped
     ports:
       - "8089:8088"
