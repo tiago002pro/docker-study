@@ -1,0 +1,15 @@
+# Entendendo:
+#   - scrape_interval: coleta métricas a cada 15 segundos.
+#   - job_name: nome da aplicação monitorada.
+#   - metrics_path: endpoint que fornece as métricas.
+#   - app:8088: nome do serviço e porta dentro da rede Docker.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'demo-project-api'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['app:8088']
