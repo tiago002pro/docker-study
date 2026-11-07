@@ -29,6 +29,21 @@ services:
     networks:
       - demo-network
 
+  grafana:
+    image: grafana/grafana:12.2.0
+    container_name: demo-dev-grafana
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - demo-network
+    depends_on:
+      - prometheus
+
 volumes:
   prometheus_data:
     name: demo-dev_prometheus_data
+  grafana_data:
+    name: demo-dev_grafana_data
