@@ -1,0 +1,39 @@
+// Descobre os containers Docker.
+discovery.docker "dev" {
+  host             = "unix:///var/run/docker.sock"
+  refresh_interval = "5s"
+}
+
+// Mantém somente os containers do nosso projeto DEV.
+discovery.relabel "dev" {
+  targets = discovery.docker.dev.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(demo-dev-.*)"
+    target_label  = "container"
+    replacement   = "$1"
+    action        = "replace"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/demo-dev-.*"
+    action        = "keep"
+  }
+}
+
+// Coleta os logs dos containers selecionados.
+loki.source.docker "dev" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.dev.output
+  labels     = { environment = "dev" }
+  forward_to = [loki.write.local.receiver]
+}
+
+// Envia os logs para o Loki.
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
