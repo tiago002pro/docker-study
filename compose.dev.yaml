@@ -8,6 +8,19 @@ services:
     ports:
       - "127.0.0.1:${DB_PORT}:5432"
 
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.17.1
+    container_name: demo-dev-postgres-exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_URI: "postgres:5432/${DB_NAME}?sslmode=disable"
+      DATA_SOURCE_USER: ${DB_USERNAME}
+      DATA_SOURCE_PASS: ${DB_PASSWORD}
+    networks:
+      - demo-network
+    depends_on:
+      - postgres
+
   # O que adicionamos:
   # - image: imagem oficial do Prometheus.
   # - ports: disponibiliza a interface em localhost:9090.

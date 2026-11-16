@@ -15,3 +15,8 @@ scrape_configs:
       - targets: ['app:8088']
         labels:
           environment: 'dev'
+  - job_name: 'demo-project-postgres'
+    static_configs:
+      - targets: [ 'postgres-exporter:9187' ]
+        labels:
+          environment: 'dev'
